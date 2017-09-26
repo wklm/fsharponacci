@@ -1,11 +1,13 @@
-let memoize f = 
-  let memo = ref Map.empty
-  fun arg ->
-    try Map.find arg !memo
-    with :? System.Collections.Generic.KeyNotFoundException ->    
-      let result = f arg
-      memo := Map.add arg result !memo
-      result
+open System
+open System.Collections.Concurrent
+
+let memo = ConcurrentDictionary<'a, 'b>()
+
+let memoize (f : 'a -> 'b) arg =
+  memo.GetOrAdd(arg, f)
+
+let mapAsync (f: 'a -> 'b) (s: seq<'a>) = 
+   seq { for element in s do yield async {return f element} }
 
 let rec fib = 
   memoize <| function 
@@ -13,11 +15,13 @@ let rec fib =
   | n -> (fib (n - 1L) + fib (n - 2L))
 
 let go (f : int64 -> int64) (range : int64) = 
-  seq { for i in [0L..range] do yield async {return f i} } 
+  [0L..range]
+  |> mapAsync f 
   |> Async.Parallel 
   |> Async.RunSynchronously
 
 [<EntryPoint>]
 let main argv =
-  go fib (int64 argv.[0]) |> printfn "%A"
+  go fib (int64 argv.[0]) 
+  |> printfn "%A"
   0
