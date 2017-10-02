@@ -1,29 +1,34 @@
+module Server
+
+open System
+open Chiron
 open Suave
 open Suave.Filters
 open Suave.Successful
-open Chiron
 open Fibonacci
 
-let config =
- { defaultConfig with
-     bindings = [ HttpBinding.createSimple HTTP "0.0.0.0" 3459 ] }
+let config = 
+  let port = int (Environment.GetEnvironmentVariable "port")
+  { defaultConfig with bindings =
+    [ HttpBinding.createSimple HTTP "0.0.0.0" port ] }
 
 type Result = 
-    { fibArray : string [] } 
-    static member ToJson(result : Result) = 
-        json { do! Json.write "Fibonacci sequence" result.fibArray }   
-        
+  { fibArray : string [] }
+  static member ToJson(result : Result) =
+    json { do! Json.write "Fibonacci sequence" result.fibArray }
+
 let fibJsonArray (n : bigint) = 
-    { fibArray = (go fib n)
+  { fibArray = (go fib n)
     |> Seq.map string
     |> Seq.toArray }
-    |> Json.serialize
-    |> Json.format
+  |> Json.serialize
+  |> Json.format
 
-let app =
-     pathScan "/%d" ((bigint:int -> bigint) >> fibJsonArray >> OK)
- 
+let app = 
+  pathScan "/%d" 
+  <| ((bigint : int -> bigint) >> fibJsonArray >> OK)
+
 [<EntryPoint>]
 let main argv = 
-    startWebServer config app
-    0
+  startWebServer config app
+  0
