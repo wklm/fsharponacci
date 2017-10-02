@@ -8,7 +8,9 @@ open Suave.Successful
 open Fibonacci
 
 let config = 
-  let port = int (Environment.GetEnvironmentVariable "port")
+  let port = match Environment.GetEnvironmentVariable("port") with
+    | null -> 8080 
+    | p -> int p
   { defaultConfig with bindings =
     [ HttpBinding.createSimple HTTP "0.0.0.0" port ] }
 
