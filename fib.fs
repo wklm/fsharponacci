@@ -15,8 +15,10 @@ let rec fib =
   if n < 2I then n
   else (fib (n - 1I) + fib (n - 2I))
 
-let go (f : bigint -> bigint) (range : bigint) = 
-  [0I..range]
+let go (f : bigint -> bigint) (range : (option<bigint> * bigint)) = 
+  match (fst range) with
+  | None -> [0I..(snd range)]
+  | Some n -> [n..snd range]
   |> mapAsync f
   |> Async.Parallel 
   |> Async.RunSynchronously
