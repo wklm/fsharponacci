@@ -1,5 +1,5 @@
 FROM microsoft/dotnet
-ADD . /app
+ADD src/ /app
 WORKDIR /app
 RUN dotnet publish --self-contained -r linux-x64 -v q 
 EXPOSE 8080
