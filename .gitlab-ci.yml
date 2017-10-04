@@ -1,5 +1,0 @@
-build:
-  tags:
-    - docker-image-build
-  script: "docker build ."
-
